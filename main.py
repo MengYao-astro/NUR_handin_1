@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[9]:
+# In[1]:
 
 
 import numpy as np
@@ -122,8 +122,8 @@ print(' a = ',a , '\n b = ',b , '\n c = ',c)
 '''
 BTW, I don't think 2(a) is slovable without viral radius, so I will set it to 1. Then, x = r.
 n(x) = A*100*(x/b)^(a-3)*exp(-(x/b)^c)
-∫∫∫ n(x) d(4*pi*x^3)/3 = 100  ===> ∫∫∫ n(x)*4*pi*x^2 dx = 100 ===> ∫∫∫ A*(x/b)^(a-3)*exp(-(x/b)^c) * 4*pi*x^2 dx= 1
-Hence, A = 1 / ∫∫∫ (x/b)^(a-3)*exp(-(x/b)^c) * 4*pi*x^2 dx
+3rd_integral n(x) d(4*pi*x^3)/3 = 100  ===> 3rd_integral n(x)*4*pi*x^2 dx = 100 ===> 3rd_integral A*(x/b)^(a-3)*exp(-(x/b)^c) * 4*pi*x^2 dx= 1
+Hence, A = 1 / 3rd_integral (x/b)^(a-3)*exp(-(x/b)^c) * 4*pi*x^2 dx
 '''
 N_sat=100.
 # Now do the integral, using trapeziodal rules
@@ -507,8 +507,6 @@ print('test the interpolator function')
 print('e.g. A(a=1.27,b=1.27,c=2.27) = ', A_abc(a_h,b_h,c_h,A_h,1.27,1.27,2.27))
 
 
-# In[57]:
-
 
 """
 '''
@@ -577,11 +575,5 @@ def least_square(ls_x,ls_y):
     b = ls_y_mean - (w * ls_x_mean)
     return w,b
 """
-print('\nQuestion 3. \n The code did not run as I  had expected it to. Please find it in source code section.)
-
-
-# In[ ]:
-
-
-
+print('\nQuestion 3. \n The code did not run as I had expected it to. Please find it in the source code section.')
 
