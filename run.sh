@@ -2,7 +2,7 @@
 
 
 # Script that returns a plot
-echo 'run main script '
+echo 'running main script '
 python3 main.py
 
 echo 'generating the pdf'

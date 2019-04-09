@@ -19,6 +19,7 @@ print('Question 1')
 print('(a) Poisson function')
 def Poisson(p_lam,p_k):
     '''
+    Possion Function (lambda^k)*(e^-lambda)/(k!)
     p_lam -----parameter lambda
     p_k   -----parameter k
     '''
@@ -66,6 +67,10 @@ def generator(n,seed):
     number = np.zeros(n)
     for i in range(n):
         #XORshift
+        '''
+	XOR-shift : keep the number in 64-bit and do logical left or right bit shift, which means some the bits that are moved out of memory.
+	the 'new bits' will be filled by 0
+	'''
         x = x ^ (x >> XOR_a1) 
         x = x ^ (x << XOR_a2) & bit64 #  do a logical 'and' to cut the number to 64 bits.
         x = x ^ (x >> XOR_a3) 
@@ -73,9 +78,13 @@ def generator(n,seed):
         '''
         use the output of XOR-shift to get a new number, the new period = the period of XOR which is 2^64-1
         l will not fed back into the XOR-shift, which works unperturbed
+	LCG : calculate the remainder and put it back into iteration. Hence, generally the period is a factor of the divisor.
         '''
         l = (LCG_a * x + LCG_c) % mod
         #MWC
+        '''
+	only the 32 bits of the old number will be manipulated and propagated to the next one
+	'''
         m = (MWC_a*(m & (2**32-1))+(m >>32)) & bit64 # constrain the bits of MWC
         #combine them
         number[i] = (l ^ m)
@@ -118,7 +127,9 @@ print('(a) solve A ')
 a = (2.5-1.1)*n1000[7]+1.1
 b = (2-0.5)*n1000[77]+0.5
 c = (4-1.5)*n1000[777]+1.5
-print(' a = ',a , '\n b = ',b , '\n c = ',c)
+print(' a = ', a)
+print(' b = ', b)
+print(' c = ', c)
 '''
 BTW, I don't think 2(a) is slovable without viral radius, so I will set it to 1. Then, x = r.
 n(x) = A*100*(x/b)^(a-3)*exp(-(x/b)^c)
@@ -129,7 +140,8 @@ N_sat=100.
 # Now do the integral, using trapeziodal rules
 def integrator(function, lower ,upper, intervals):
     '''
-    trapeziodal rule
+    trapeziodal rule:
+    s=h/2(f(x_0)+2sum(f(x_1_to_n-1))+f(x_n))
     function = 
     lower = lower limit of the integral
     upper = upper limit
@@ -176,7 +188,9 @@ ax2_1.plot(data_ture_x, data_ture_n,'o',label='true data')
 #Neville's method
 def neville(x_ture, y_ture, x_new):
     '''
-    Neville's Algorithm
+    Neville's Algorithm:
+    p_i,i(x) = y_i
+    p_i,j(x) = [(x_j-x)*p_i,j-1(x)+(x-x_i)*p_i+1,j(x)]/x_j-x_i
     '''   
     n = len(x_ture)
     y = y_ture.copy()
@@ -192,6 +206,9 @@ for i in range(len(inter_n_Neville)):
 ax2_1.plot(inter_x,inter_n_Neville,'b',label='Neville')
 #linear interpolation
 def linear(inter_x):
+    '''
+    linear interpolation is quite easy. Take the ture points and calculate the slope and constant for every two adjacent points.
+    '''
     #calculate k & b in each range
     #[10^-4,10^-2)
     k0 = (data_ture_n[1]-data_ture_n[0])/(data_ture_x[1]-data_ture_x[0])
@@ -233,6 +250,7 @@ print('Analytical dn(x)/dx (x=5) = ', dn_x(b))
 # Use central difference to calculate the derivative.
 def central_difference(function,x,h):
     '''
+    derivative = lim_(h-->0) [f(x+h)-f(x-h)]/2*h
     function =
     x = 
     h = step size
@@ -251,7 +269,7 @@ n2m=generator(2*10**6,seed)
 def rejection_sample(function, x_min, x_max, y_min, y_max, n): 
     '''
     I use rejection sampling here is because it is easy to apply with my random number generator
-    according to the slides. If the number < p(x) then it will be accepted.
+    according to the slides. If the yi < p(x) then the combination of x_i&y_i will be accepted.
     
     function = 
     x_min, x_max = 
@@ -289,7 +307,7 @@ def halo(n):
     '''
     r = x * viral radius
     as befor, set viral radius = 1
-    sample_x is the possible positions, drag out some of them
+    sample_x is the possible positions, drag out some of them (literally 100)
     n = number_of_satellites
     '''
     satel_x = sample_x[0:n]  # which indicate r
@@ -300,9 +318,12 @@ def halo(n):
 halo_100 = halo(100)
 print('Sampling distribution. See fig.3.')
 print('Positions of 100 satellites :')
-print('r = \n', halo_100[0])
-print('phi = \n', halo_100[1])
-print('theta = \n', halo_100[2])
+print('r = ')
+print(halo_100[0])
+print('phi = ')
+print(halo_100[1])
+print('theta = ')
+print(halo_100[2])
 
 '''
 (e)
@@ -339,6 +360,7 @@ so i chose the most basic one : bisection N_x1*N_x2
 print('\n(f) rooting finding')
 def bisection_root(function, x1, x2, epsilon ,iteration):
     '''
+    test the sign of f(x1)*f(x2), if it is negative then the root is in this bracket.
     (x1,x2) = range of the root
     epsilo = percision
     iteration = iteration times (in case over-shooting)
@@ -364,6 +386,8 @@ def bisection_root(function, x1, x2, epsilon ,iteration):
 def maximum(a,b,function):
     '''
     use bracket method to find the maximum
+    split the bracket into 3 pieces with 2 point and compare them
+    if the right one is larger, then use the new left point to replace the original left point 
     '''
     while b-a > 10**-8 :
         x=a+(b-a)/3.
@@ -377,20 +401,25 @@ y=maximum(10**-4,5,N_x)
 N_x_root = lambda x: A*N_sat*(x/b)**(a-3)*np.exp(-(x/b)**c)*4*np.pi*x**2-y/2
 root_1 = bisection_root(N_x_root, 10**-4,1,10**-4,100)
 root_2 = bisection_root(N_x_root, 1,5,10**-4,100)
-print('Root_1 = ', root_1,'\nRoot_2 = ', root_2)
+print('Root_1 = ', root_1)
+print('Root_2 = ', root_2)
 
 '''
 (g) histogram and Poisson distribution
 '''
 print('\n(g)Histogram and Poisson distribution')
-radial_bin_l = bin_edge[amount.argmax(axis=0)]  # located the largrest amount from the histogram
-radial_bin_r = bin_edge[amount.argmax(axis=0)+1]
+radial_bin_l = bin_edge[amount.argmax(axis=0)]  # located the largrest amount from the histogram, lower limit
+radial_bin_r = bin_edge[amount.argmax(axis=0)+1] # upper limit
 radial_bin=[] # the radii in that largest bin
+#test those satellites one by one , if their radii are in the range , save it.
 for i in radii:
     if i >= radial_bin_l and i <= radial_bin_r:
         radial_bin.append(i)
 
 def quick_sort(array,i,j):
+    '''
+    pick an element as pivot and partition the given array around the picked pivot.
+    '''
     if i < j:
         pivot = quick_sort_process(array,i,j)
         quick_sort(array,i,pivot)
@@ -415,7 +444,7 @@ percent84 = sorted_radii[int(0.84 * len(sorted_radii))]
 print('median = ', median)
 print('16th percentile = ', percent16)
 print('84th percentile = ', percent84)
-# histogram
+# histogram : for each halo , test how many satellites' radii are in that range and count it.
 hist_each_halo = np.zeros(1000)
 for i in range(1000):
     count=0
@@ -463,6 +492,7 @@ def interpolator_3d(a_ture,b_ture,c_ture,A_ture,step_size):
     do the interpolation on dimensions one by one.
     intepolate a point between two orginal points
     step_size = interpolation intervals, I used 0.05 > 0.01
+    this function will generate the more points, which means make the array larger and has a narrower interval.
     '''
     a_inter = np.arange(1.1,2.51,step_size)
     b_inter = np.arange(0.5,2.01,step_size)
@@ -490,6 +520,7 @@ def interpolator_3d(a_ture,b_ture,c_ture,A_ture,step_size):
 def A_abc(a_ture,b_ture,c_ture,A_ture,a_new,b_new,c_new):
     '''
     define a function that can use interpolation to output an A value based on any new combination of (a,b,c)
+    As same as 3d-interpolator, do one dimension by one dimension.
     '''
     A_inter_a = np.zeros((len(b_ture),len(c_ture))) # after interpolation on 'a' direction
     for i in range(len(b_ture)):
@@ -575,5 +606,5 @@ def least_square(ls_x,ls_y):
     b = ls_y_mean - (w * ls_x_mean)
     return w,b
 """
-print('\nQuestion 3. \n The code did not run as I had expected it to. Please find it in the source code section.')
+print('\nQuestion 3. \n The code did not run as I had expected it to but I wrote the least-square fitting algorithm. Please find it in the source code section.')
 
